@@ -1,8 +1,8 @@
 import cv2
+import sys
 import time
 import numpy as np
 import pymurapi as mur
-from typing import List, Tuples
 
 
 # --- Конфигурация ---
@@ -90,50 +90,31 @@ class ImageProcessorInterface:
 
 
 # --- Реализация обработки изображений ---
-class ImageProcessor(ImageProcessorInterface):
+class ImageProcessor():
     """Image processing implementation."""
 
-    def find_rectangle(self, image): # -> tuple[tuple[int, int], tuple[int, int]]
+    def detection_figures(self, image, lower_bound, upper_bound): # -> tuple[tuple[int, int], tuple[int, int]]
         """
-        Follows the white rectangle.
+        Follows the figures all color.
 
         Args:
             image (np.ndarray): Input image.
+            lower_bound (): 
+            upper_bound ():
 
         Returns:
             tuple[tuple[int, int], tuple[int, int]]: Top-left and bottom-right points of the rectangle.
         """
-        contours = self.get_contours(image, Config.LOWER_BOUND_WHITE, Config.UPPER_BOUND_WHITE)
+        contours = ImageProcessorInterface.get_contours(image, lower_bound, upper_bound)
 
         if contours:
-            pt1, pt2 = self.find_extreme_points(contours)
+            pt1, pt2 = ImageProcessorInterface.find_extreme_points(contours)
 
             if Config.DRAW:
                 cv2.rectangle(image, pt1, pt2, (0, 255, 255), 5)
             return pt1, pt2
 
         return (0, 0), (0, 0)
-
-    def find_orange_arrow_area(self, image): # -> int
-        """
-        Processes an image to detect an orange arrow.
-
-        Args:
-            image (np.ndarray): Input image.
-
-        Returns:
-            int: Area of the orange arrow if detected, otherwise 0.
-        """
-        contours = self.get_contours(image, Config.LOWER_BOUND_ORANGE, Config.UPPER_BOUND_ORANGE)
-
-        if contours:
-            pt1, pt2 = self.find_extreme_points(contours)
-            area = self.calculate_area(pt1, pt2)
-            return area
-
-        return 0
-
-
 
 # --- Управление глубиной (PID-регулятор) --- 
 class DepthController:
@@ -274,7 +255,7 @@ class AUVNavigator(ImageProcessor):
 class AUVController(MotionController, DepthController, AUVNavigator):
     """Class for controlling the AUV (Autonomous Underwater Vehicle)."""
     
-    def __init__(self, config): # -> None
+    def __init__(self, config = Config): # -> None
         """
         Initializes the AUV controller by setting up the motion, depth, and navigation controllers.
         
@@ -286,14 +267,15 @@ class AUVController(MotionController, DepthController, AUVNavigator):
         self.config = config
 
     def corpus_research(self): # -> None
-        """
+        """ Task № 4
         Conducts the corpus research by controlling the AUV to search for an orange arrow 
         and then navigate towards a rectangle.
         """
         # Searching for the orange arrow
         while True:
             image = self.config.AUV.get_image_bottom()
-            area = self.find_orange_arrow_area(image)
+            pt1, pt2 = self.detection_figures(image, self.config.LOWER_BOUND_ORANGE, self.config.UPPER_BOUND_ORANGE)
+            area = ImageProcessorInterface.calculate_area(pt1, pt2)
             
             if area > self.config.AREA_THRESHOLD:
                 break
@@ -306,13 +288,14 @@ class AUVController(MotionController, DepthController, AUVNavigator):
         # Navigating towards the white rectangle
         while True:
             image = self.config.AUV.get_image_front()
-            pt1, pt2 = self.find_rectangle(image)
-            
-            area = self.calculate_area(pt1, pt2)
+            pt1, pt2 = self.detection_figures(image, self.config.LOWER_BOUND_WHITE, self.config.UPPER_BOUND_WHITE)
+            area = ImageProcessorInterface.calculate_area(pt1, pt2)
 
             if area == 0:
-                self.config.AUV.set_motor_power(0, 20)
-                self.config.AUV.set_motor_power(1, 20)
+                self.set_power_swim_forward(20)
+                continue
+            elif abs(53000 - area) < 2000:
+                break
 
             self.adjust_power(pt1, pt2)
 
@@ -321,11 +304,10 @@ class AUVController(MotionController, DepthController, AUVNavigator):
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
 
-            if abs(53000 - area) < 2000:
-                break
-
     def ascent(self) -> None:
-        """Makes the AUV ascend."""
+        """ Task № 5
+        Makes the AUV ascend.
+        """
         # Implement the ascent functionality here
         pass
 
