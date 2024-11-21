@@ -2,27 +2,11 @@ import cv2
 import time
 import numpy as np
 
+from settings import Config
 from processing import ImageProcessor, ImageProcessorInterface
+from controllers import MotionController, DepthController
 
-from controllers import MotionController, DepthController, AUVController
-
-
-
-
-
-
-
-
-
-
-
-
-
-# --- Логика навигации ---
-class AUVNavigator(ImageProcessor):
-    ...
-
-class AUVController(MotionController, DepthController, AUVNavigator):
+class AUVController(MotionController, DepthController, ImageProcessor):
     """Class for controlling the AUV (Autonomous Underwater Vehicle)."""
     
     def __init__(self, config = Config): # -> None
@@ -45,7 +29,7 @@ class AUVController(MotionController, DepthController, AUVNavigator):
         while True:
             current_depth = self.config.AUV.get_depth()
             power = self.control_depth(current_depth)
-            self.set_power_swim_up(power)
+            self.swim_forward(power)
             print(power)
             if abs(3.4 - current_depth) < 0.2:
                 self.set_power_swim_up(-power) 
@@ -119,5 +103,5 @@ class AUVController(MotionController, DepthController, AUVNavigator):
 if __name__ == "__main__":
     app = AUVController(Config)
     app.set_target_depth(3.4)
-    # app.corpus_research()
-    app.ascent()
+    app.corpus_research()
+    # app.ascent()

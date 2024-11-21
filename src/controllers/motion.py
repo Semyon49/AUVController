@@ -2,6 +2,8 @@ import cv2
 import numpy as np
 import pymurapi as mur
 
+from settings import Config
+    
 # --- Управление двигателями ---
 class MotionController:
     """Class for controlling the motors of the AUV (Autonomous Underwater Vehicle)."""
@@ -19,7 +21,7 @@ class MotionController:
         self.speed = config.SPEED
         self.k = config.K_SPEED
 
-    def adjust_power(self, pt1, pt2): # -> None
+    def adjust_motor_power(self, pt1, pt2): # -> None
         """
         Adjusts the motor power based on the detected positions of the rectangle.
 
@@ -35,7 +37,7 @@ class MotionController:
         self.config.AUV.set_motor_power(0, power_l)
         self.config.AUV.set_motor_power(1, power_r)
 
-    def adjust_power_to_center(self, pt1):
+    def adjust_motor_power_to_center(self, pt1):
         if pt1[1] > self.config.IMAGE_SHAPE[1]:
             power = 1
         else:
@@ -50,7 +52,7 @@ class MotionController:
         self.config.AUV.set_motor_power(0, power_l)
         self.config.AUV.set_motor_power(1, power_r)
 
-    def set_power_swim_up(self, power): # -> None
+    def swim_up(self, power): # -> None
         """
         Makes the AUV swim upwards by setting motor power.
 
@@ -60,7 +62,7 @@ class MotionController:
         self.config.AUV.set_motor_power(2, power)
         self.config.AUV.set_motor_power(3, power)
 
-    def set_power_swim_forward(self, power): # -> None
+    def swim_forward(self, power): # -> None
         """
         Sets the power for both motors to the same value.
 
@@ -70,7 +72,7 @@ class MotionController:
         self.config.AUV.set_motor_power(0, power)
         self.config.AUV.set_motor_power(1, power)
 
-    def stop(self): # -> None:
+    def stop_all_motors(self): # -> None:
         """
         Stops all motors of the AUV.
         """

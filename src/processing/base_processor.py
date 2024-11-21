@@ -1,5 +1,9 @@
 import cv2
 import numpy as np
+import pymurapi as mur
+
+from settings import Config
+from .interfaces import ImageProcessorInterface
 
 # --- Реализация обработки изображений ---
 class ImageProcessor():

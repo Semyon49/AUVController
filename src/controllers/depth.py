@@ -3,6 +3,8 @@ import time
 import numpy as np
 import pymurapi as mur
 
+from settings import Config
+
 # --- Управление глубиной (PID-регулятор) --- 
 class DepthController:
     """Class for managing the depth of an AUV (Autonomous Underwater Vehicle)."""

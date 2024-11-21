@@ -1,5 +1,3 @@
-# processing/__init__.py
-
 from .base_processor import ImageProcessor
 from .interfaces import ImageProcessorInterface
 
