@@ -29,11 +29,11 @@ class AUVController(MotionController, DepthController, ImageProcessor):
         while True:
             current_depth = self.config.AUV.get_depth()
             power = self.control_depth(current_depth)
-            self.swim_forward(power)
+            self.swim_up(power)
             print(power)
             if abs(3.4 - current_depth) < 0.2:
-                self.set_power_swim_up(-power) 
-                self.stop()
+                self.swim_up(-power)
+                self.stop_all_motors()
                 break
 
         while True:
@@ -41,9 +41,10 @@ class AUVController(MotionController, DepthController, ImageProcessor):
             pt1, pt2 = self.detection_figures(image, self.config.LOWER_BOUND_ORANGE, self.config.UPPER_BOUND_ORANGE)
             area = ImageProcessorInterface.calculate_area(pt1, pt2)
             
-            self.set_power_swim_forward(self.config.SPEED)
+            self.swim_forward(self.config.SPEED)
+            print(pt1, pt2)
             if area > self.config.AREA_THRESHOLD:
-                self.stop()
+                self.stop_all_motors()
                 break
 
             if self.config.DRAW:
@@ -63,7 +64,7 @@ class AUVController(MotionController, DepthController, ImageProcessor):
             elif abs(53000 - area) < 2000:
                 break
 
-            self.adjust_power(pt1, pt2)
+            self.adjust_motor_power(pt1, pt2)
 
             if self.config.DRAW:
                 cv2.imshow('Processed Image', image)

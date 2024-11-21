@@ -22,12 +22,7 @@ class ImageProcessor():
             tuple[tuple[int, int], tuple[int, int]]: Top-left and bottom-right points of the rectangle.
         """
         contours = ImageProcessorInterface.get_contours(image, lower_bound, upper_bound)
-
-        cv2.drawContours(image, contours, -1, (255, 255, 0), 3)
-
-        cv2.imshow('winname', image)
-        cv2.waitKey(1)
-
+        
         if contours:
             pt1, pt2 = ImageProcessorInterface.find_extreme_points(contours)
 

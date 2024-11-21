@@ -15,7 +15,7 @@ class Config:
     LOWER_BOUND_WHITE = np.array([0, 0, 190])
     UPPER_BOUND_WHITE = np.array([360, 20, 255])
 
-    LOWER_BOUND_ORANGE = np.array([10, 100, 100])
+    LOWER_BOUND_ORANGE = np.array([10, 50, 50])
     UPPER_BOUND_ORANGE = np.array([35, 255, 255])
 
     LOWER_BOUND_RED = np.array([0, 10, 70])   

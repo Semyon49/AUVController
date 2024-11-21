@@ -21,7 +21,7 @@ class ImageProcessorInterface:
         hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
         mask = cv2.inRange(hsv_image, lower_bound, upper_bound)
         contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
+        
         return contours
         
     @staticmethod
@@ -43,22 +43,15 @@ class ImageProcessorInterface:
         Returns:
             tuple[tuple[int, int], tuple[int, int]]: Top-left and bottom-right points of the rectangle.
         """
-        if contours and all(c.size > 0 for c in contours):  # Ensure contours are not empty
-            all_points = np.vstack(contours)  # Stack all points into a single 2D array
-        else:
-            raise ValueError("Contours are empty or invalid.")
+        all_points = np.vstack(contours).squeeze()
+        leftmost = all_points[np.argmin(all_points[:, 0])]
+        rightmost = all_points[np.argmax(all_points[:, 0])]
+        topmost = all_points[np.argmin(all_points[:, 1])]
+        bottommost = all_points[np.argmax(all_points[:, 1])]
 
-        if all_points.ndim == 2 and all_points.shape[1] == 2:  # Validate 2D shape
-            leftmost = all_points[np.argmin(all_points[:, 0])]
-            rightmost = all_points[np.argmax(all_points[:, 0])]
-            topmost = all_points[np.argmin(all_points[:, 1])]
-            bottommost = all_points[np.argmax(all_points[:, 1])]
-
-            pt1 = (leftmost[0], topmost[1])
-            pt2 = (rightmost[0], bottommost[1])
-            return pt1, pt2
-        else:
-            return (0, 0), (0, 0)
+        pt1 = (leftmost[0], topmost[1])
+        pt2 = (rightmost[0], bottommost[1])
+        return pt1, pt2
 
         all_points = np.vstack(contours).squeeze()
         leftmost = all_points[np.argmin(all_points[:, 0])]
