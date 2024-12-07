@@ -6,7 +6,7 @@ class ImageProcessorInterface:
     """Interface for image processing."""
 
     @staticmethod
-    def get_contours(image, lower_bound, upper_bound): #-> list[np.ndarray]
+    def get_contours(image, lower_bound = None, upper_bound = None): #-> list[np.ndarray]
         """
         Creates a mask based on HSV boundaries.
 
@@ -18,6 +18,9 @@ class ImageProcessorInterface:
         Returns:
             list[np.ndarray]: List of contours found in the mask.
         """
+        if lower_bound == None and upper_bound == None:
+            return self.__get_contours_bin(image)
+
         hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
         mask = cv2.inRange(hsv_image, lower_bound, upper_bound)
         contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -25,7 +28,7 @@ class ImageProcessorInterface:
         return contours
         
     @staticmethod
-    def get_contours_bin(image, lower_bound, upper_bound):
+    def __get_contours_bin(image):
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         _, threshold = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY_INV)
         contours, _ = cv2.findContours(threshold, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -44,14 +47,17 @@ class ImageProcessorInterface:
             tuple[tuple[int, int], tuple[int, int]]: Top-left and bottom-right points of the rectangle.
         """
         all_points = np.vstack(contours).squeeze()
-        leftmost = all_points[np.argmin(all_points[:, 0])]
-        rightmost = all_points[np.argmax(all_points[:, 0])]
-        topmost = all_points[np.argmin(all_points[:, 1])]
-        bottommost = all_points[np.argmax(all_points[:, 1])]
+        print(all_points)
+        if len(all_points) >= 4:
+            leftmost = all_points[np.argmin(all_points[:, 0])]
+            rightmost = all_points[np.argmax(all_points[:, 0])]
+            topmost = all_points[np.argmin(all_points[:, 1])]
+            bottommost = all_points[np.argmax(all_points[:, 1])]
 
-        pt1 = (leftmost[0], topmost[1])
-        pt2 = (rightmost[0], bottommost[1])
-        return pt1, pt2
+            pt1 = (leftmost[0], topmost[1])
+            pt2 = (rightmost[0], bottommost[1])
+            return pt1, pt2
+        return (0, 0), (0, 0)
 
         all_points = np.vstack(contours).squeeze()
         leftmost = all_points[np.argmin(all_points[:, 0])]

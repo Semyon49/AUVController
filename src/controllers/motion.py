@@ -62,15 +62,20 @@ class MotionController:
         self.config.AUV.set_motor_power(2, power)
         self.config.AUV.set_motor_power(3, power)
 
-    def swim_forward(self, power): # -> None
+    def swim_forward(self, power, power_right=None): 
         """
-        Sets the power for both motors to the same value.
+        Sets the power for both motors. If only one value is provided, both motors 
+        are set to the same power. If two values are provided, they are applied 
+        separately.
 
         Args:
-            power (int): The power to set for both motors.
+            power (int): The power to set for the left motor, or both if power_right is None.
+            power_right (int, optional): The power to set for the right motor. Defaults to None.
         """
+        if power_right is None:
+            power_right = power
         self.config.AUV.set_motor_power(0, power)
-        self.config.AUV.set_motor_power(1, power)
+        self.config.AUV.set_motor_power(1, power_right)
 
     def stop_all_motors(self): # -> None:
         """
